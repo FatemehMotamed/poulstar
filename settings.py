@@ -8,7 +8,7 @@ try:
     Base = declarative_base()
 
     Session = sessionmaker(bind=engine)
-
+    session = Session()
 
 except:
     print("Connect to database failed")

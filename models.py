@@ -11,128 +11,135 @@ class Person(Base):
     fname = Column(String(50))
     lname = Column(String(50))
     phone = Column(String(11))
-    code = Column(String(10),primary_key = True)
-    address = Column(String(500))
+    code = Column(String(10))
     register = relationship("Register", uselist=False ,back_populates='person')
 
-    def __init__(self,fname,lname,phone,code,address):
+    def __init__(self,fname=None,lname=None,phone=None,code=None):
         self.fname=fname
         self.lname=lname
         self.phone=phone
         self.code=code
-        self.address=address
 
-class Vehicle(Base):
-    __tablename__="vehicle"
-
-    id=Column(Integer(),primary_key=True)
-    name=Column(String(50))
-    capacity=Column(Integer())
-    company=Column(String(50))
-    ticket = relationship("Ticket", back_populates='vehicle')
-    airplane = relationship("Airplane", uselist=False ,back_populates='vehicle')
-    buss = relationship("Buss", uselist=False ,back_populates='vehicle')
-    train = relationship("Train", uselist=False ,back_populates='vehicle')
-
-    def __init__(self,name,capacity,company):
-        self.name=name
-        self.capacity=capacity
-        self.company=company
+# class Vehicle(Base):
+#     __tablename__="vehicle"
+#
+#     id=Column(Integer(),primary_key=True)
+#     name=Column(String(50))
+#     capacity=Column(Integer())
+#     company=Column(String(50))
+#     ticket = relationship("Ticket", back_populates='vehicle')
+#     airplane = relationship("Airplane", uselist=False ,back_populates='vehicle')
+#     buss = relationship("Buss", uselist=False ,back_populates='vehicle')
+#     train = relationship("Train", uselist=False ,back_populates='vehicle')
+#
+#     def __init__(self,name,capacity,company):
+#         self.name=name
+#         self.capacity=capacity
+#         self.company=company
 
 
 class Airplane(Base):
     __tablename__="airplane"
 
     id=Column(Integer(), primary_key=True)
+    name = Column(String(50))
+    capacity = Column(Integer())
+    company = Column(String(50))
     allowed_cargo=Column(Integer())
     model=Column(String(50))
-    vehicle_id = Column(Integer, ForeignKey("vehicle.id"))
-    vehicle = relationship('Vehicle',back_populates='airplane')
+    class_cabin = Column(String(50))
+    ticket = relationship("Ticket", back_populates='airplane')
 
-    def __init__(self,allowed_cargo,model,vehicle):
+    def __init__(self,name=None,capacity=None,company=None,allowed_cargo=None,model=None,class_cabin=None):
+        self.name = name
+        self.capacity = capacity
+        self.company = company
         self.allowed_cargo=allowed_cargo
         self.model=model
-        self.vehicle=vehicle
-
-
+        self.class_cabin=class_cabin
 
 class Train(Base):
     __tablename__="train"
 
     id=Column(Integer(),primary_key=True)
-    hall_type=Column(String(50))
+    name = Column(String(50))
+    capacity = Column(Integer())
+    company = Column(String(50))
+    class_type=Column(String(50))
     cupe_capacity=Column(String(50))
     speed=Column(String(50))
     class_cabin=Column(String(50))
-    vehicle_id = Column(Integer, ForeignKey("vehicle.id"))
-    vehicle = relationship('Vehicle', back_populates='train')
+    ticket = relationship("Ticket", back_populates='train')
 
-    def __init__(self,hall_type,cupe_capacity,speed,class_cabin,vehicle):
-        self.hall_type=hall_type
+    def __init__(self,name=None,capacity=None,company=None,class_type=None,cupe_capacity=None,speed=None,class_cabin=None,vehicle=None):
+        self.name = name
+        self.capacity = capacity
+        self.company = company
+        self.class_type_type=class_type
         self.cupe_capacity=cupe_capacity
         self.speed=speed
         self.class_cabin=class_cabin
         self.vehicle = vehicle
-#
+
 class Buss(Base):
     __tablename__="buss"
 
     id=Column(Integer(),primary_key=True)
-    hall_type=Column(String(50))
+    name = Column(String(50))
+    capacity = Column(Integer())
+    company = Column(String(50))
     class_cabin=Column(String(50))
     model=Column(String(50))
-    vehicle_id = Column(Integer, ForeignKey("vehicle.id"))
-    vehicle = relationship('Vehicle', back_populates='buss')
+    ticket = relationship("Ticket", back_populates='buss')
 
-    def __init__(self,hall_type,class_cabin,model,vehicle):
-        self.hall_type=hall_type
+    def __init__(self,name=None,capacity=None,company=None,class_cabin=None,model=None):
+        self.name = name
+        self.capacity = capacity
+        self.company = company
         self.class_cabin=class_cabin
         self.model=model
-        self.vehicle = vehicle
+
 
 class Ticket(Base):
     __tablename__="ticket"
 
     id=Column(Integer(),primary_key=True)
-    class_travel=Column(String(50))
-    inventory=Column(Integer)
     origin=Column(String(50))
     destination=Column(String(50))
     time=Column(String(50))
     depart_date=Column(String(50))
     return_date=Column(String(50))
     basic_price=Column(Integer)
-    vehicle_id = Column(Integer, ForeignKey('vehicle.id'))
-    vehicle= relationship("Vehicle", back_populates='ticket')
+    airplane_id = Column(Integer, ForeignKey('airplane.id'))
+    airplane= relationship("Airplane", back_populates='ticket')
+    train_id = Column(Integer, ForeignKey('train.id'))
+    train = relationship("Train", back_populates='ticket')
+    buss_id = Column(Integer, ForeignKey('buss.id'))
+    buss = relationship("Buss", back_populates='ticket')
     registers = relationship('Register', backref='ticket')
 
-    def __init__(self,class_travel,inventory,origin,destination,time,depart_date,return_date,basic_price,vehicle):
-        self.class_travel=class_travel
-        self.inventory=inventory
+    def __init__(self,origin=None,destination=None,time=None,depart_date=None,return_date=None,basic_price=None,airplane=None,train=None,buss=None):
         self.origin=origin
         self.destination=destination
         self.time=time
         self.depart_date=depart_date
         self.return_date=return_date
         self.basic_price=basic_price
-        self.vehicle = vehicle
+        self.airplane = airplane
+        self.train = train
+        self.buss = buss
 
 class Register(Base):
     __tablename__ = "register"
     id = Column(Integer(), primary_key=True)
-    state = Column(String(50))
-    ticket_code = Column(String(50))
     finish_price = Column(Integer)
-    register_time = Column(Integer)
-    register_date = Column(Integer)
+    register_time = Column(String(50))
+    register_date = Column(String(50))
     ticket_id = Column(Integer, ForeignKey('ticket.id'))
     person_id = Column(Integer, ForeignKey("person.id"))
     person = relationship('Person', back_populates='register')
 
-    def __init__(self, state, ticket_code, finish_price, register_time, register_date, ticket,person):
-
-        self.state=state
-        self.ticket_code=ticket_code
+    def __init__(self, finish_price, register_time, register_date, ticket,person):
         self.finish_price=finish_price
         self.register_time=register_time
         self.register_date=register_date

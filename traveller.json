@@ -1,0 +1,17 @@
+[
+    {
+        "age": "Adults (12+ years)",
+        "number": 2,
+        "finish_price": 24000.0
+    },
+    {
+        "age": "Children (2-12 years)",
+        "number": 0,
+        "finish_price": 0
+    },
+    {
+        "age": "Baby (-2 years)",
+        "number": 2,
+        "finish_price": 4800.0
+    }
+]

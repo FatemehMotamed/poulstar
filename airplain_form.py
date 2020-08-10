@@ -1,64 +1,48 @@
+from models import *
+from settings import Session, session
 from vehicle_form import VehicleForm
 from tkinter import *
 from form_helper import FormHelper
+from datetime import date, datetime
+
 
 class AirplaneForm(VehicleForm):
-    def __init__(self, frame_name,window):
-        super().__init__(frame_name,window)
+    def __init__(self, frame_name, window,model=None):
+        super().__init__(frame_name, window)
+        self.model=Airplane()
+        self.model_name=Airplane
+        self.cabin_classes = ["Economy", "Business", "First Class"]
+        self.cabin_class = StringVar()
+        self.cabin_class.set("Economy")
 
-    def select_ticket_exclusive_frame(self):
-        t = self.ticket_type.get()
-        if t == "one_way":
-            self.return_button.config(state="disabled")
-            self.return_entry.config(state="disabled")
-            self.return_lable.config(state="disabled")
-        elif t == "return":
-            self.return_button.config(state="normal")
-            self.return_entry.config(state="normal")
-            self.return_lable.config(state="normal")
+    def register_submit(self):
+        self.model.name = self.name_entry.get()
+        self.model.capacity = self.capacity_entry.get()
+        self.model.company = self.company_entry.get()
+        self.model.model = self.model_entry.get()
+        self.model.allowed_cargo = self.capacity_entry.get()
+        self.model.class_cabin = self.cabin_class.get()
+        session = Session()
+        session.add(self.model)
+        session.commit()
 
-    def create_form(self):
-        self.ticket_type = StringVar()
-        self.ticket_type.set("return")
-        cabin_classes = ["Economy", "Business", "First Class"]
-        cabin_class = StringVar()
-        cabin_class.set("Economy")
-        # exclusive_frame = Frame(self.frame_name)
-        # exclusive_frame.grid(row=1, column=0, columnspan=40, sticky="NWES", pady=20)
 
-        self.return_radio = Radiobutton(self.exclusive_frame, text="Return", variable=self.ticket_type, value="return",
-                                        font=("Times", 12),
-                                        command=self.select_ticket_exclusive_frame)
-        self.return_radio.grid(row=0, column=0)
+    def calculate_finish_price(self,price,ticket_date):
+        f = FormHelper()
+        data = f.read_json()
+        distance_date=self.day_distance(ticket_date)
+        if distance_date<7:
+            inc=(price * 20) / 100
+            price=price+inc
+        for item in data:
+            if item['number'] > 0:
+                if item['age'] == "Children (2-12 years)":
+                    item['finish_price'] = price / 2
+                elif item['age'] == "Baby (-2 years)":
+                    item['finish_price'] = (price * 20) / 100
+                else:
+                    item['finish_price']=price
 
-        self.one_way_radio = Radiobutton(self.exclusive_frame, text="One Way", variable=self.ticket_type, value="one_way",
-                                         font=("Times", 12), command=self.select_ticket_exclusive_frame)
-        self.one_way_radio.grid(row=0, column=1)
+        f.write_json(data)
 
-        class_label = Label(self.exclusive_frame, text="Cabin Class", font=("Times", 12), fg="blue")
-        class_label.grid(row=0, column=2, padx=20)
 
-        class_option = OptionMenu(self.exclusive_frame, cabin_class, *cabin_classes)
-        class_option.grid(row=0, column=3)
-
-        date_frame = Frame(self.exclusive_frame)
-        date_frame.grid(row=2, column=0, columnspan=40, sticky="NWES")
-
-        depart_lable = Label(date_frame, text="Depart Date ", font=("Times", 12), fg="blue")
-        depart_lable.grid(row=0, column=0, padx=5)
-
-        self.depart_entry = Entry(date_frame)
-        self.depart_entry.grid(row=0, column=1)
-
-        depart_button = Button(date_frame, text="Select", font=("Times", 10), command=lambda: FormHelper(self.window).calendar(self.depart_entry))
-        depart_button.grid(row=0, column=2, padx=5)
-
-        self.return_lable = Label(date_frame, text="Return Date ", font=("Times", 12), fg="blue")
-        self.return_lable.grid(row=0, column=3, padx=5)
-
-        self.return_entry = Entry(date_frame)
-        self.return_entry.grid(row=0, column=4)
-
-        self.return_button = Button(date_frame, text="Select", font=("Times", 10),
-                                    command=lambda: FormHelper(self.window).calendar(self.return_entry))
-        self.return_button.grid(row=0, column=5, padx=5)
